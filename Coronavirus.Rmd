@@ -1,0 +1,68 @@
+---
+title: "Coronavirus Analysis"
+author: "Navid Mohseni"
+date: "5/17/2021"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+The coronavirus package provides a tidy format dataset of the 2019 Novel Coronavirus COVID-19 (2019-nCoV) epidemic. The raw data pulled from the Johns Hopkins University Center for Systems Science and Engineering (JHU CCSE) Coronavirus repository.
+
+We know that COVID-19 spreads through respiratory droplets, such as through coughing, sneezing, or speaking. But, how quickly did the virus spread across the globe? And, can we see any effect from country-wide policies, like shutdowns and quarantines?
+
+More importantly, I'll analyze my country (Iran) during this pandemic, in more details.
+
+Let's start by taking the proper data. 
+Fortunately, there is a package for coronavirus. Also, I'll load other important packages. 
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+install.packages("coronavirus")
+library(coronavirus)
+library(tidyverse)
+library(lubridate)
+library(ggmap)
+```
+
+The dataset has the following fields:
+* date: the date of the summary
+* province: the province or state
+* country: the country or region
+* lat: latitude
+* long: longitude
+* type: type of the case (i.e., confirmed, death)
+* cases: the number of daily cases
+
+```{r}
+head(coronavirus)
+glimpse(coronavirus)
+```
+
+Summary of the total confirmed cases by country
+
+```{r}
+coronavirus %>% 
+  filter(type == "confirmed") %>%
+  group_by(country) %>%
+  summarise(total_cases = sum(cases)) %>%
+  arrange(-total_cases) 
+```
+
+Let's take into consideration my country: Iran in the latest day of the dataset.
+
+```{r}
+coronavirus %>% 
+  filter(date == max(date)) %>%
+  select(country, type, cases) %>%
+  group_by(country, type) %>%
+  summarise(total_cases = sum(cases)) %>%
+  pivot_wider(names_from = type,
+              values_from = total_cases) %>%
+  arrange(-confirmed) %>% 
+  filter(country == "Iran")
+```
